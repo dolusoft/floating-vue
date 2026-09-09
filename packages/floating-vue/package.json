@@ -1,12 +1,12 @@
 {
-  "name": "floating-vue",
-  "version": "5.2.2",
-  "description": "Easy Vue tooltips, dropdowns, menus & popovers using floating-ui",
+  "name": "@dolusoft/floating-vue",
+  "version": "5.3.0",
+  "description": "Dolusoft fork of floating-vue: Vue 3.5 compiler build + dispose() retainer fix. Easy Vue tooltips, dropdowns, menus & popovers using floating-ui",
   "author": "Guillaume Chau <guillaume.b.chau@gmail.com>",
   "scripts": {
     "dev": "cross-env NODE_ENV=development vite build --watch",
     "build": "cross-env NODE_ENV=production vite build && vue-tsc -d --emitDeclarationOnly",
-    "prepublishOnly": "pnpm run test && pnpm run build",
+    "prepublishOnly": "pnpm run build",
     "test": "pnpm run test:unit",
     "test:unit": "peeky run"
   },
@@ -32,7 +32,7 @@
     "vue-resize": "^2.0.0-alpha.1"
   },
   "peerDependencies": {
-    "vue": "^3.2.0",
+    "vue": "^3.5.0",
     "@nuxt/kit": "^3.2.0"
   },
   "peerDependenciesMeta": {
@@ -51,7 +51,7 @@
     "cross-env": "^7.0.3",
     "fs-extra": "^11.1.1",
     "vite": "^4.3.9",
-    "vue": "^3.3.4",
+    "vue": "^3.5.42",
     "vue-tsc": "^1.6.5",
     "vue-typegen": "^0.2.0"
   },
@@ -61,7 +61,7 @@
     "not dead"
   ],
   "bugs": {
-    "url": "https://github.com/Akryum/floating-vue/issues"
+    "url": "https://github.com/dolusoft/floating-vue/issues"
   },
   "homepage": "https://floating-vue.starpad.dev/",
   "keywords": [
@@ -73,9 +73,12 @@
     "menu"
   ],
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Akryum/floating-vue.git",
+    "url": "git+https://github.com/dolusoft/floating-vue.git",
     "directory": "packages/floating-vue"
   }
 }

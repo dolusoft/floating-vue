@@ -518,7 +518,18 @@ const createPopper = () => defineComponent({
       if (this.isDisposed) return
       this.isDisposed = true
       this.$_removeEventListeners()
+      // dolusoft/frontendx#1003: `$_hideInProgress` is only cleared by the next
+      // `$_scheduleShow`, so a hide that is still waiting out its delay leaves it
+      // set and makes the `hide()` below a no-op. `$_applyHide` then never runs,
+      // the popper stays in the module-level `shownPoppers` list, and that list
+      // keeps the unmounted component -- and its whole `.parent` chain -- alive.
+      // Clearing the flag first lets dispose take the popper out of the list.
+      this.$_hideInProgress = false
       this.hide({ skipDelay: true })
+      // `$_applyHide` schedules a dispose timer whose only job (detaching the
+      // popper node) the next line already does; drop it so the callback does
+      // not outlive the component.
+      clearTimeout(this.$_disposeTimer)
       this.$_detachPopperNode()
 
       this.isMounted = false
