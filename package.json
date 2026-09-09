@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@akryum/sheep": "^0.5.0",
-    "floating-vue": "workspace:*",
+    "@dolusoft/floating-vue": "workspace:*",
     "@typescript-eslint/eslint-plugin": "^5.59.11",
     "@typescript-eslint/parser": "^5.59.11",
     "@vue/eslint-config-standard": "^8.0.1",
