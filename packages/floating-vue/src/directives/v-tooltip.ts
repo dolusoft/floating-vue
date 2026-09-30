@@ -1,4 +1,4 @@
-import { App, createApp, h, Ref, ref } from 'vue'
+import { App, createApp, customRef, h, queuePostFlushCb, Ref, shallowRef } from 'vue'
 import TooltipDirective from '../components/TooltipDirective.vue'
 import { getDefaultConfig } from '../config'
 import { placements } from '../util/popper'
@@ -46,26 +46,67 @@ interface Directive {
 }
 
 let directiveApp: App
-let directives: Ref<Directive[]>
+const directives: Directive[] = []
 let uid = 0
+
+/**
+ * All directive tooltips are rendered by one shared app. Its render must not track
+ * each directive's state: when many directives are created, updated or destroyed in
+ * the same tick (for example one per cell of a large grid, each in its own component
+ * job), every change would re-queue the shared app's render job after the job that
+ * caused it, and the flush would hit Vue's recursive update limit and drop the
+ * remaining jobs. Changes are coalesced instead: the render tracks a single revision
+ * that is bumped at most once per flush, at the end of it.
+ */
+const revision = shallowRef(0)
+let updateQueued = false
+
+function bumpRevision () {
+  updateQueued = false
+  revision.value++
+}
+
+function scheduleDirectiveAppUpdate () {
+  if (updateQueued) return
+  updateQueued = true
+  queuePostFlushCb(bumpRevision)
+}
+
+/**
+ * A ref that is not tracked by the shared app's render; setting it schedules one
+ * coalesced re-render of the shared app.
+ */
+function directiveStateRef<T> (initial: T): Ref<T> {
+  let value = initial
+  return customRef(() => ({
+    get: () => value,
+    set: (newValue: T) => {
+      value = newValue
+      scheduleDirectiveAppUpdate()
+    },
+  }))
+}
 
 function ensureDirectiveApp () {
   if (directiveApp) return
-
-  directives = ref([])
 
   directiveApp = createApp({
     name: 'VTooltipDirectiveApp',
     setup () {
       return {
-        directives,
+        revision,
       }
     },
     render () {
-      return this.directives.map((directive) => {
+      // Track the revision only; directive state is read untracked.
+      // eslint-disable-next-line no-unused-expressions
+      this.revision
+      return directives.map((directive) => {
+        const options = directive.options.value
+        const shown = directive.shown.value
         return h(TooltipDirective, {
-          ...directive.options,
-          shown: directive.shown || directive.options.shown,
+          ...options,
+          shown: shown || options.shown,
           key: directive.id,
         })
       })
@@ -82,15 +123,16 @@ function ensureDirectiveApp () {
 
 export function createTooltip (el, value, modifiers) {
   ensureDirectiveApp()
-  const options = ref(getOptions(el, value, modifiers))
-  const shown = ref(false)
+  const options = directiveStateRef(getOptions(el, value, modifiers))
+  const shown = directiveStateRef(false)
 
   const item = {
     id: uid++,
     options,
     shown,
   }
-  directives.value.push(item)
+  directives.push(item)
+  scheduleDirectiveAppUpdate()
 
   // Class on target
   if (el.classList) {
@@ -113,8 +155,11 @@ export function createTooltip (el, value, modifiers) {
 
 export function destroyTooltip (el) {
   if (el.$_popper) {
-    const index = directives.value.indexOf(el.$_popper.item)
-    if (index !== -1) directives.value.splice(index, 1)
+    const index = directives.indexOf(el.$_popper.item)
+    if (index !== -1) {
+      directives.splice(index, 1)
+      scheduleDirectiveAppUpdate()
+    }
 
     delete el.$_popper
     delete el.$_popperOldShown
