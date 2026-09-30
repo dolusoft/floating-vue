@@ -1,6 +1,6 @@
 {
   "name": "@dolusoft/floating-vue",
-  "version": "5.3.0",
+  "version": "5.2.2-dolusoft.1",
   "description": "Dolusoft fork of floating-vue: Vue 3.5 compiler build + dispose() retainer fix. Easy Vue tooltips, dropdowns, menus & popovers using floating-ui",
   "author": "Guillaume Chau <guillaume.b.chau@gmail.com>",
   "scripts": {
