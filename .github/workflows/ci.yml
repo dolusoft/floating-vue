@@ -1,11 +1,10 @@
 name: CI
 
-# Public repo: runs on GitHub-hosted runners only. Never point this at the
-# self-hosted LAN runners - a fork pull_request would run inside the LAN.
+# Public repo on the dedicated, sandboxed `dolusoft-fork` runner (org runner
+# group `public-forks`, restricted to this file on main). Never add
+# pull_request / pull_request_target: fork PR code must not reach our runner.
 on:
   push:
-    branches: [main]
-  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -18,7 +17,7 @@ concurrency:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, dolusoft-fork]
     timeout-minutes: 20
     steps:
       - name: Checkout
