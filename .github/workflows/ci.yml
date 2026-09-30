@@ -1,7 +1,7 @@
 name: CI
 
-# Runs on Dolusoft self-hosted LAN runners (org runner group "backend").
-# The repo is private; pull_request only fires for branches inside the repo.
+# Public repo: runs on GitHub-hosted runners only. Never point this at the
+# self-hosted LAN runners - a fork pull_request would run inside the LAN.
 on:
   push:
     branches: [main]
@@ -18,19 +18,15 @@ concurrency:
 
 jobs:
   ci:
-    runs-on: [self-hosted, dolusoft-lan]
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      # Runner instances share one user/home; an isolated dest avoids the
-      # ERR_PNPM_LINKING_FAILED race seen on the frontendx runners.
       # Version comes from package.json "packageManager".
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          dest: ~/setup-pnpm-${{ runner.name }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
