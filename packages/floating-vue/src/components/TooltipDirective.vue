@@ -130,7 +130,10 @@ export default defineComponent({
 
     async finalContent () {
       await this.$nextTick()
-      this.$refs.popper.onResize()
+      // The tooltip can be unmounted while waiting: frontendx closes the dropdown that holds
+      // the target right after a UI language switch changed the content. With no popper left
+      // there is nothing to reposition.
+      this.$refs.popper?.onResize()
     },
   },
 

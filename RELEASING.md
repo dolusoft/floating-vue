@@ -83,3 +83,11 @@ Keep these when merging upstream; do not resolve a conflict by taking the upstre
   and `shown` refs are untracked `customRef`s that schedule an update, and the render tracks a
   single revision bumped at most once per flush in a post-flush callback. `el.$_popper.options`
   and `show()`/`hide()` keep their API. Guarded by `tests/node/directive-batch.test.mjs`.
+- **Content change on a tooltip that is unmounted meanwhile** (`src/components/TooltipDirective.vue`).
+  The `finalContent` watcher waits a tick before repositioning the popper. Upstream then called
+  `this.$refs.popper.onResize()` unconditionally; if the tooltip was unmounted during that tick
+  (frontendx closes the dropdown holding the target right after a UI language switch changed the
+  content) `$refs.popper` is `null` and the watcher threw `Cannot read properties of null (reading
+  'onResize')`. The call is skipped when the popper is gone. Guarded by
+  `tests/node/content-change.test.mjs`, which also checks that an open tooltip is still
+  repositioned.
