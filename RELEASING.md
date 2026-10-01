@@ -64,9 +64,10 @@ Reference the asset URL of a specific version; there is no `latest` URL:
 "floating-vue": "https://github.com/dolusoft/floating-vue/releases/download/v<version>/dolusoft-floating-vue-<version>.tgz"
 ```
 
-Update the manifest and the lockfile in the same commit. The repository is private: an
-unauthenticated download of the asset fails, so a consumer's CI or Docker build cannot fetch it
-until the repository is public or the build is given a token.
+Update the manifest and the lockfile in the same commit. The repository is public, so the asset
+downloads without authentication and a consumer's CI or Docker build needs no token; it only needs
+network access to `github.com` and `release-assets.githubusercontent.com`, where the download
+redirects.
 
 ## Fork deviations
 
