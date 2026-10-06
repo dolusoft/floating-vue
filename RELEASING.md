@@ -98,6 +98,7 @@ Keep these when merging upstream; do not resolve a conflict by taking the upstre
   objects, including added or removed keys. Unchanged hosts render no tooltip children, while
   a change to one directive renders only that child. Guarded by `tests/node/stable-props.test.mjs`.
 - **Shallow option comparison for stable directive props** (`src/directives/v-tooltip.ts`). The
-  directive compares options shallowly with its stored snapshot. If the same object or array is
-  mutated in place (for example `value.triggers.push(...)`), the tooltip is not updated; pass a new
-  reference instead.
+  directive compares option values shallowly with its stored snapshot, so changing a top-level key
+  is detected even on a reused binding object. A nested object or array that is mutated in place
+  (for example `value.triggers.push(...)`) keeps its identity and the tooltip is not updated; pass
+  a new reference instead.
