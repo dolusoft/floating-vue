@@ -4,6 +4,10 @@ import { getDefaultConfig } from '../config'
 import { placements } from '../util/popper'
 
 const TARGET_CLASS = 'v-popper--has-tooltip'
+const elementNodes = new WeakMap<object, {
+  targetNodes: () => Element[]
+  referenceNode: () => Element
+}>()
 
 /**
  * Support placement as directive modifier
@@ -34,8 +38,16 @@ export function getOptions (el, value, modifiers) {
     options = { content: false }
   }
   options.placement = getPlacement(options, modifiers)
-  options.targetNodes = () => [el]
-  options.referenceNode = () => el
+  let nodes = elementNodes.get(el)
+  if (!nodes) {
+    nodes = {
+      targetNodes: () => [el],
+      referenceNode: () => el,
+    }
+    elementNodes.set(el, nodes)
+  }
+  options.targetNodes = nodes.targetNodes
+  options.referenceNode = nodes.referenceNode
   return options
 }
 
@@ -87,6 +99,27 @@ function directiveStateRef<T> (initial: T): Ref<T> {
   }))
 }
 
+function directiveOptionsRef (initial: Record<string, unknown>): Ref<Record<string, unknown>> {
+  let value = initial
+  // A separate snapshot detects changes even when callers mutate and reuse value.
+  let snapshot = { ...initial }
+  const optionKeys = (options: Record<string, unknown>) => Object.keys(options)
+    .filter(key => key !== 'targetNodes' && key !== 'referenceNode')
+  return customRef(() => ({
+    get: () => value,
+    set: (newValue: Record<string, unknown>) => {
+      const nextSnapshot = { ...newValue }
+      const keys = optionKeys(snapshot)
+      if (keys.length === optionKeys(nextSnapshot).length && keys.every(key =>
+        Object.prototype.hasOwnProperty.call(nextSnapshot, key) && Object.is(snapshot[key], nextSnapshot[key]),
+      )) return
+      value = newValue
+      snapshot = nextSnapshot
+      scheduleDirectiveAppUpdate()
+    },
+  }))
+}
+
 function ensureDirectiveApp () {
   if (directiveApp) return
 
@@ -123,7 +156,7 @@ function ensureDirectiveApp () {
 
 export function createTooltip (el, value, modifiers) {
   ensureDirectiveApp()
-  const options = directiveStateRef(getOptions(el, value, modifiers))
+  const options = directiveOptionsRef(getOptions(el, value, modifiers))
   const shown = directiveStateRef(false)
 
   const item = {

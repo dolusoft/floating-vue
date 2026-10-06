@@ -92,3 +92,8 @@ Keep these when merging upstream; do not resolve a conflict by taking the upstre
   'onResize')`. The call is skipped when the popper is gone. Guarded by
   `tests/node/content-change.test.mjs`, which also checks that an open tooltip is still
   repositioned.
+- **Stable directive options** (`src/directives/v-tooltip.ts`). Per-element `targetNodes` and
+  `referenceNode` closures are reused. Shallow-equal options keep their object identity and do
+  not schedule a shared-app render; a stored shallow snapshot detects changes to reused binding
+  objects, including added or removed keys. Unchanged hosts render no tooltip children, while
+  a change to one directive renders only that child. Guarded by `tests/node/stable-props.test.mjs`.
