@@ -1,4 +1,4 @@
-import { defineComponent } from 'vue'
+import { defineComponent, type PropType } from 'vue'
 import {
   autoPlacement,
   computePosition,
@@ -162,7 +162,7 @@ const createPopper = () => defineComponent({
     },
 
     container: {
-      type: [String, Object, Element, Boolean],
+      type: [String, Object, Element, Boolean] as PropType<string | Element | ShadowRoot | false>,
       default: defaultPropFactory('container'),
     },
 

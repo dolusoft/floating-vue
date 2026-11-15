@@ -175,7 +175,7 @@ export default defineComponent({
     },
 
     container: {
-      type: [String, Object, Element, Boolean],
+      type: [String, Object, Element, Boolean] as PropType<string | Element | ShadowRoot | false>,
       default: undefined,
     },
 
