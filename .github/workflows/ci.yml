@@ -3,6 +3,7 @@ name: CI
 # Public repo on the dedicated, sandboxed `dolusoft-fork` runner (org runner
 # group `public-forks`, restricted to this file on main). Never add
 # pull_request / pull_request_target: fork PR code must not reach our runner.
+# Manual checks of other branches use an isolated GitHub-hosted runner.
 on:
   push:
     branches: [main]
@@ -17,7 +18,7 @@ concurrency:
 
 jobs:
   ci:
-    runs-on: [self-hosted, dolusoft-fork]
+    runs-on: ${{ fromJSON(github.ref == 'refs/heads/main' && '["self-hosted","dolusoft-fork"]' || '["ubuntu-latest"]') }}
     timeout-minutes: 20
     steps:
       - name: Checkout
